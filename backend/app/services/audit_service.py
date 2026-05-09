@@ -5,6 +5,7 @@ Core audit logging service.
 
 import math
 from datetime import datetime, timedelta, timezone
+from typing import Any
 from uuid import UUID
 
 from fastapi import Request

@@ -11,7 +11,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
+from app.core.dependencies import get_current_user
 from app.database import get_db
 from app.models.ai_session import AIQuerySession
 from app.models.alert import Alert
