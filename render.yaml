@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: enterprise-ops-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker backend.main:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: enterprise-ops-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ENVIRONMENT
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+
+databases:
+  - name: enterprise-ops-db
+    plan: free

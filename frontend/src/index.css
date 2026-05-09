@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg
+           bg-primary text-white font-medium text-sm
+           hover:bg-primary-dark active:scale-95
+           transition-all duration-150 focus:outline-none focus:ring-2
+           focus:ring-primary focus:ring-offset-2 disabled:opacity-50
+           disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg
+           bg-surface border border-surface-border text-text-secondary font-medium text-sm
+           hover:bg-gray-100 active:scale-95
+           transition-all duration-150 focus:outline-none;
+  }
+
+  .card {
+    @apply bg-surface-card rounded-xl shadow-card border border-surface-border p-6;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 rounded-lg border border-surface-border
+           bg-white text-text-primary text-sm placeholder-text-muted
+           focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+           transition-all duration-150;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text-secondary mb-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-admin {
+    @apply badge bg-purple-100 text-purple-700;
+  }
+
+  .badge-manager {
+    @apply badge bg-blue-100 text-blue-700;
+  }
+
+  .badge-analyst {
+    @apply badge bg-emerald-100 text-emerald-700;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
