@@ -69,13 +69,13 @@ def create_template(
 ) -> SQLTemplateResponse:
     """Create a new SQL template (Manager/Admin only)."""
     result = sql_service.create_template(db, data, current_user.id)
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="TEMPLATE_CREATED",
         user_id=current_user.id,
         entity_type="sql_template",
         entity_id=uuid.UUID(result.id),
-        metadata={"name": result.name},
+        event_metadata={"name": result.name},
         ip_address=request.client.host if request.client else None,
     )
     return result
@@ -126,7 +126,7 @@ def delete_template(
     db: Session = Depends(get_db),
 ) -> dict:
     sql_service.delete_template(db, template_id, current_user)
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="TEMPLATE_DELETED",
         user_id=current_user.id,
@@ -168,13 +168,13 @@ def execute_sql(
         template_id=template_id,
     )
 
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="SQL_EXECUTED",
         user_id=current_user.id,
         entity_type="query_history",
         entity_id=uuid.UUID(result.history_id),
-        metadata={"rows": result.row_count, "ms": result.execution_ms, "status": result.status},
+        event_metadata={"rows": result.row_count, "ms": result.execution_ms, "status": result.status},
         ip_address=request.client.host if request.client else None,
     )
     return result
@@ -200,11 +200,11 @@ def execute_raw(
         executed_by_id=current_user.id,
         source="manual",
     )
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="RAW_SQL_EXECUTED",
         user_id=current_user.id,
-        metadata={"rows": result.row_count, "status": result.status},
+        event_metadata={"rows": result.row_count, "status": result.status},
         ip_address=request.client.host if request.client else None,
     )
     return result
@@ -304,13 +304,13 @@ def create_workflow(
     db: Session = Depends(get_db),
 ) -> WorkflowResponse:
     result = workflow_service.create_workflow(db, data, current_user.id)
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="WORKFLOW_CREATED",
         user_id=current_user.id,
         entity_type="scheduled_workflow",
         entity_id=uuid.UUID(result.id),
-        metadata={"name": result.name, "cron": result.cron_expression},
+        event_metadata={"name": result.name, "cron": result.cron_expression},
         ip_address=request.client.host if request.client else None,
     )
     return result
@@ -343,7 +343,7 @@ def delete_workflow(
     db: Session = Depends(get_db),
 ) -> dict:
     workflow_service.delete_workflow(db, workflow_id, current_user)
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="WORKFLOW_DELETED",
         user_id=current_user.id,

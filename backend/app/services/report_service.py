@@ -49,7 +49,7 @@ class ReportService:
             id=str(r.id), report_type=r.report_type, report_name=r.report_name,
             output_format=r.output_format, file_size_bytes=r.file_size_bytes or 0,
             generation_source=r.generation_source, date_range_start=r.date_range_start,
-            date_range_end=r.date_range_end, metadata=r.metadata, status=r.status,
+            date_range_end=r.date_range_end, metadata=r.report_metadata, status=r.status,
             generated_by_name=name, generated_at=r.generated_at,
             download_url=f"/api/v1/reports/{r.id}/download",
         )
@@ -102,7 +102,7 @@ class ReportService:
             record.date_range_start = start
             record.date_range_end = end
             record.expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-            record.metadata = {"sections_included": sections, "date_range_days": request.date_range_days}
+            record.report_metadata = {"sections_included": sections, "date_range_days": request.date_range_days}
             db.commit()
             db.refresh(record)
             logger.info("Report ready: %s (%s bytes)", report_name, file_size)

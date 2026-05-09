@@ -16,7 +16,7 @@ from app.schemas.alert import (
     AlertRuleUpdate, CreateManualAlertRequest, NotificationLogResponse,
     ResolveAlertRequest, TestEmailRequest, UnreadCountResponse,
 )
-from app.services.alert_service import alert_service, _alert_to_response, _rule_to_response
+from app.services.audit_service import audit_service
 from app.services.email_service import email_service
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["Alerts & Notifications"])
@@ -54,9 +54,10 @@ def create_rule(
 ):
     result = alert_service.create_alert_rule(db, body, cur.id)
     try:
-        from app.core.audit import write_audit_log
-        write_audit_log(db, action="ALERT_RULE_CREATED", resource_type="alert_rule",
-                        resource_id=result.id, metadata={"name": body.name})
+        audit_service.write_log(
+            db, action="ALERT_RULE_CREATED", entity_type="alert_rule",
+            entity_id=result.id, event_metadata={"name": body.name}
+        )
     except Exception:
         pass
     return result
@@ -145,10 +146,11 @@ def create_manual_alert(
         notify_roles=roles, send_email=send,
     )
     try:
-        from app.core.audit import write_audit_log
-        write_audit_log(db, action="MANUAL_ALERT_CREATED", resource_type="alert",
-                        resource_id=str(result.id), user_id=str(cur.id),
-                        metadata={"title": body.title, "severity": body.severity})
+        audit_service.write_log(
+            db, action="MANUAL_ALERT_CREATED", entity_type="alert",
+            entity_id=result.id, user_id=cur.id,
+            event_metadata={"title": body.title, "severity": body.severity}
+        )
     except Exception:
         pass
     return _alert_to_response(result, False)

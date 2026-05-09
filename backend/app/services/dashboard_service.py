@@ -471,7 +471,7 @@ class DashboardService:
         snap = KPISnapshot(
             metric_name=data.metric_name, metric_value=data.metric_value,
             metric_unit=data.metric_unit, dimension=data.dimension,
-            dimension_date=data.dimension_date, metadata=data.metadata,
+            dimension_date=data.dimension_date, extra_metadata=data.metadata,
         )
         db.add(snap)
         db.commit()

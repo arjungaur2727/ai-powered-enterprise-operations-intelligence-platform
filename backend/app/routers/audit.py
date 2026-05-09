@@ -97,7 +97,7 @@ def export_audit_logs(
         user_id=current_user.id,
         user_email=current_user.email,
         user_role=current_user.role,
-        metadata={
+        event_metadata={
             "filters": {
                 "action": action,
                 "category": action_category,

@@ -16,7 +16,7 @@ from app.schemas.alert import (
     AlertListResponse, AlertResponse, AlertRuleCreate, AlertRuleResponse,
     AlertRuleUpdate, ResolveAlertRequest, UnreadCountResponse,
 )
-from app.services.email_service import email_service
+from app.services.audit_service import audit_service
 
 logger = get_logger(__name__)
 
@@ -165,10 +165,11 @@ class AlertService:
         db.refresh(alert)
 
         try:
-            from app.core.audit import write_audit_log
-            write_audit_log(db, action="ALERT_TRIGGERED", resource_type="alert",
-                            resource_id=str(alert.id),
-                            metadata={"type": alert_type, "severity": severity})
+            audit_service.write_log(
+                db, action="ALERT_TRIGGERED", entity_type="alert",
+                entity_id=alert.id, entity_name=alert.title,
+                event_metadata={"type": alert_type, "severity": severity}
+            )
         except Exception:
             pass
 
@@ -307,10 +308,11 @@ class AlertService:
         db.refresh(alert)
         self.mark_read(db, alert_id, current_user.id)
         try:
-            from app.core.audit import write_audit_log
-            write_audit_log(db, action="ALERT_RESOLVED", resource_type="alert",
-                            resource_id=str(alert_id),
-                            metadata={"resolved_by": str(current_user.id)})
+            audit_service.write_log(
+                db, action="ALERT_RESOLVED", entity_type="alert",
+                entity_id=alert_id, user_id=current_user.id,
+                event_metadata={"resolved_by": str(current_user.id)}
+            )
         except Exception:
             pass
         logger.info("Alert resolved by %s: %s", current_user.email, alert.title)

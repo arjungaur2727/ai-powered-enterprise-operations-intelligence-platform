@@ -44,7 +44,7 @@ def register(
         entity_type="user",
         entity_id=new_user.id,
         entity_name=new_user.email,
-        metadata={"email": new_user.email, "role": new_user.role},
+        event_metadata={"email": new_user.email, "role": new_user.role},
         ip_address=request.client.host if request.client else None,
         user_agent=request.headers.get("User-Agent"),
     )
@@ -71,7 +71,7 @@ def login(
             action="AUTH_FAILED",
             user_email=login_request.email,
             status="failure",
-            metadata={"reason": "invalid_credentials"},
+            event_metadata={"reason": "invalid_credentials"},
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("User-Agent"),
         )
@@ -92,7 +92,7 @@ def login(
         entity_type="user",
         entity_id=user.id,
         entity_name=user.email,
-        metadata={"login_method": "jwt"},
+        event_metadata={"login_method": "jwt"},
         ip_address=request.client.host if request.client else None,
         user_agent=request.headers.get("User-Agent"),
     )

@@ -91,13 +91,13 @@ async def upload_file(
         upload_id=upload_id,
     )
 
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="FILE_UPLOAD_INIT",
         user_id=current_user.id,
         entity_type="upload",
         entity_id=upload.id,
-        metadata={
+        event_metadata={
             "file_name": upload.file_name,
             "file_type": file_type,
             "row_count": upload.row_count,
@@ -165,13 +165,13 @@ def confirm_upload(
         target_table=body.target_table,
     )
 
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="FILE_UPLOAD_CONFIRMED",
         user_id=current_user.id,
         entity_type="upload",
         entity_id=upload_id,
-        metadata={
+        event_metadata={
             "rows_inserted": rows_inserted,
             "target_table": body.target_table,
             "processing_ms": processing_ms,
@@ -317,7 +317,7 @@ def delete_upload(
     upload.status = "deleted"
     db.commit()
 
-    audit_service.log(
+    audit_service.write_log(
         db,
         action="UPLOAD_DELETED",
         user_id=current_user.id,
