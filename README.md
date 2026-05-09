@@ -5,6 +5,11 @@
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![React](https://img.shields.io/badge/react-18-blue.svg)
 
+## 🌐 Live Application
+*   **Production Frontend**: [https://ai-powered-enterprise-operations-in.vercel.app](https://ai-powered-enterprise-operations-in.vercel.app)
+*   **Production API**: [https://enterprise-ops-backend.onrender.com](https://enterprise-ops-backend.onrender.com)
+*   **API Documentation**: [https://enterprise-ops-backend.onrender.com/docs](https://enterprise-ops-backend.onrender.com/docs)
+
 An enterprise-grade operational intelligence platform that combines automated data ingestion, advanced SQL workflow management, and natural language AI querying into a single unified dashboard.
 
 ## 🚀 Key Features
