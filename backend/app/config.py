@@ -32,6 +32,7 @@ class Settings(BaseSettings):
 
     # Runtime
     ENVIRONMENT: str = "development"
+    CORS_ORIGINS: str = "*"
 
     class Config:
         env_file = ".env"

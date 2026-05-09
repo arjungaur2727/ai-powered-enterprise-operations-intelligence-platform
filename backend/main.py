@@ -65,7 +65,7 @@ async def lifespan(app: FastAPI):
             db=_db,
             action="SYSTEM_STARTUP",
             status="success",
-            metadata={
+            event_metadata={
                 "environment": settings.ENVIRONMENT,
                 "version": "1.0.0",
                 "modules": [
@@ -99,7 +99,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-allowed_origins = ["*"] if settings.ENVIRONMENT == "development" else []
+allowed_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",")]
 
 app.add_middleware(
     CORSMiddleware,
