@@ -30,7 +30,7 @@ def get_scheduler() -> BackgroundScheduler:
         try:
             from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
             jobstores = {
-                "default": SQLAlchemyJobStore(url=settings.DATABASE_URL)
+                "default": SQLAlchemyJobStore(url=settings.sqlalchemy_database_url)
             }
         except Exception as exc:
             logger.warning("Could not set up PostgreSQL jobstore: %s. Using memory store.", exc)

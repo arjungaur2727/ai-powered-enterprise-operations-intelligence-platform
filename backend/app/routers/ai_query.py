@@ -32,6 +32,7 @@ from app.schemas.ai_query import (
     SuggestionChip,
 )
 from app.services.ai_service import ai_service
+from app.services.schema_service import schema_service
 
 logger = get_logger(__name__)
 

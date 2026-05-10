@@ -1,93 +1,70 @@
 /**
  * frontend/src/api/auditApi.js
  * API client for Audit Logs & System Monitoring
+ * Updated to use centralized axiosClient.
  */
 
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    Authorization: `Bearer ${token}`,
-  };
-};
+import axiosClient from "./axiosClient";
 
 export async function getAuditLogs(params) {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/audit`, {
+  const response = await axiosClient.get("/api/v1/audit", {
     params,
-    headers: getAuthHeaders(),
   });
   return response.data;
 }
 
 export async function getAuditSummary() {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/audit/summary`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get("/api/v1/audit/summary");
   return response.data;
 }
 
 export async function exportAuditLogs(filters) {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/audit/export`, {
+  const response = await axiosClient.get("/api/v1/audit/export", {
     params: filters,
-    headers: getAuthHeaders(),
-    responseType: 'blob',
+    responseType: "blob",
   });
-  
-  const today = new Date().toISOString().split('T')[0];
+
+  const today = new Date().toISOString().split("T")[0];
   const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
-  link.setAttribute('download', `audit_log_${today}.csv`);
+  link.setAttribute("download", `audit_log_${today}.csv`);
   document.body.appendChild(link);
   link.click();
   link.remove();
   window.URL.revokeObjectURL(url);
-  
+
   return true;
 }
 
 export async function getUserActivity(userId) {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/audit/user/${userId}`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get(`/api/v1/audit/user/${userId}`);
   return response.data;
 }
 
 export async function getEntityAuditLog(entityType, entityId) {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/audit/entity/${entityType}/${entityId}`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get(`/api/v1/audit/entity/${entityType}/${entityId}`);
   return response.data;
 }
 
 export async function getSystemHealth() {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/monitoring/health`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get("/api/v1/monitoring/health");
   return response.data;
 }
 
 export async function getPlatformStats() {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/monitoring/stats`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get("/api/v1/monitoring/stats");
   return response.data;
 }
 
 export async function getHealthSnapshots(hours = 24) {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/monitoring/snapshots`, {
+  const response = await axiosClient.get("/api/v1/monitoring/snapshots", {
     params: { hours },
-    headers: getAuthHeaders(),
   });
   return response.data;
 }
 
 export async function getSchedulerJobs() {
-  const response = await axios.get(`${API_BASE_URL}/api/v1/monitoring/scheduler`, {
-    headers: getAuthHeaders(),
-  });
+  const response = await axiosClient.get("/api/v1/monitoring/scheduler");
   return response.data;
 }

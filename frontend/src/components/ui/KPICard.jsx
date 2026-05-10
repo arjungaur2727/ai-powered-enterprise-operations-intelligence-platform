@@ -5,15 +5,25 @@ import React from "react";
 import { TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { formatTokenCount } from "../../utils/formatters";
 
-function formatValue(value, format) {
-  if (value === null || value === undefined) return "—";
-  switch (format) {
-    case "percentage": return `${Number(value).toFixed(1)}%`;
-    case "ms": return `${Math.round(value)}ms`;
-    case "tokens": return formatTokenCount(value);
-    default: return Number(value).toLocaleString();
-  }
-}
+// Safe number parser — handles strings like "+18%", "NaN", null, undefined
+const safeNumber = (val) => {
+  if (val === null || val === undefined) return 0;
+  const parsed = parseFloat(String(val).replace(/[^0-9.-]/g, ""));
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+// Safe value formatter
+const formatValue = (v, format) => {
+  if (v === null || v === undefined) return "—";
+  const num = safeNumber(v);
+  if (isNaN(num)) return "—";
+  if (format === "percentage") return `${num.toFixed(1)}%`;
+  if (format === "ms") return num >= 1000 ? `${(num/1000).toFixed(1)}s` : `${Math.round(num)}ms`;
+  if (format === "tokens") return num >= 1000000
+    ? `${(num/1000000).toFixed(1)}M`
+    : num >= 1000 ? `${(num/1000).toFixed(1)}K` : String(Math.round(num));
+  return Math.round(num).toLocaleString();
+};
 
 const ACCENT = {
   blue:   { icon: "bg-blue-100",   text: "text-blue-600" },
@@ -52,9 +62,11 @@ export default function KPICard({
     );
   }
 
-  const isPositive = trendValue > 0;
-  const isNegative = trendValue < 0;
-  const trendDisplay = Math.abs(trendValue).toFixed(1);
+  // Safe trend value
+  const safeTrendValue = safeNumber(trendValue);
+  const isPositive = safeTrendValue > 0;
+  const isNegative = safeTrendValue < 0;
+  const trendDisplay = Math.abs(safeTrendValue).toFixed(1);
 
   return (
     <div
@@ -69,7 +81,7 @@ export default function KPICard({
           {Icon && <Icon className={`h-5 w-5 ${textClass}`} />}
         </div>
         {/* Trend badge */}
-        {trend !== "neutral" && trendValue !== 0 ? (
+        {trend !== "neutral" && safeTrendValue !== 0 ? (
           <span className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
             isPositive ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
           }`}>
@@ -94,7 +106,7 @@ export default function KPICard({
       {/* Footer */}
       <div className="flex items-center gap-1 text-xs text-gray-400">
         {subtitle && <span>{subtitle}</span>}
-        {trendValue !== 0 && (
+        {safeTrendValue !== 0 && (
           <span className={`ml-auto font-medium ${isPositive ? "text-emerald-600" : "text-red-500"}`}>
             {isPositive ? "↑" : "↓"} {trendDisplay}% {trendLabel}
           </span>

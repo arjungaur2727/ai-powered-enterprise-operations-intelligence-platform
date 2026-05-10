@@ -40,4 +40,11 @@ class Settings(BaseSettings):
         extra = "ignore"
 
 
+    @property
+    def sqlalchemy_database_url(self) -> str:
+        """SQLAlchemy requires 'postgresql://' instead of 'postgres://'."""
+        if self.DATABASE_URL.startswith("postgres://"):
+            return self.DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        return self.DATABASE_URL
+
 settings = Settings()

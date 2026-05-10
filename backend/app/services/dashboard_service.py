@@ -18,7 +18,7 @@ from app.schemas.dashboard import (
 logger = get_logger(__name__)
 
 
-def _pct_change(current: float, previous: float) -> float:
+def _pct_change(current: int, previous: int) -> float:
     if previous == 0:
         return 100.0 if current > 0 else 0.0
     return round(((current - previous) / previous) * 100, 1)
@@ -104,17 +104,17 @@ class DashboardService:
             queries_today=q_total,
             queries_success_today=q_success,
             queries_failed_today=q_failed,
-            query_success_rate_today=round((q_success / q_total * 100), 1) if q_total else 0.0,
-            avg_execution_ms_today=float(q_avg_ms) if q_avg_ms else None,
+            query_success_rate_today=round((q_success / q_total * 100), 1) if q_total > 0 else 0.0,
+            avg_execution_ms_today=float(q_avg_ms) if q_avg_ms is not None else 0.0,
             uploads_today=u_total,
             rows_ingested_today=u_rows,
-            upload_success_rate_today=round((u_success / u_total * 100), 1) if u_total else 0.0,
+            upload_success_rate_today=round((u_success / u_total * 100), 1) if u_total > 0 else 0.0,
             active_workflows=wf_active,
             failing_workflows=wf_failing,
-            workflow_health_pct=round(((wf_active - wf_failing) / wf_active * 100), 1) if wf_active else 100.0,
+            workflow_health_pct=round(((wf_active - wf_failing) / wf_active * 100), 1) if wf_active > 0 else 100.0,
             ai_queries_today=ai_total,
             ai_tokens_today=ai_tokens,
-            ai_execution_rate_today=round((ai_executed / ai_total * 100), 1) if ai_total else 0.0,
+            ai_execution_rate_today=round((ai_executed / ai_total * 100), 1) if ai_total > 0 else 0.0,
             active_users_today=active_users,
             total_users=total_users,
             queries_vs_yesterday=_pct_change(q_total, q_yesterday),

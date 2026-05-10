@@ -32,6 +32,7 @@ from app.schemas.ai_query import (
     SaveTemplateRequest,
     SuggestionChip,
 )
+from app.services.schema_service import schema_service
 logger = get_logger(__name__)
 
 MODEL_NAME = "gpt-4o"

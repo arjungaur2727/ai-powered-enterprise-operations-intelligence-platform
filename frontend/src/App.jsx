@@ -12,6 +12,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import DataUpload from "./pages/DataUpload";
 import SQLWorkflows from "./pages/SQLWorkflows";
@@ -39,6 +40,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           {/* All authenticated users */}
           <Route element={<ProtectedRoute />}>

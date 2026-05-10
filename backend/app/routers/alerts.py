@@ -18,6 +18,7 @@ from app.schemas.alert import (
 )
 from app.services.audit_service import audit_service
 from app.services.email_service import email_service
+from app.services.alert_service import alert_service, _alert_to_response, _rule_to_response
 
 router = APIRouter(prefix="/api/v1/alerts", tags=["Alerts & Notifications"])
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Zap, Mail, Lock, Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -147,7 +147,17 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="px-8 pb-6 text-center text-xs text-text-muted">
+          {/* Footer */}
+          <div className="bg-slate-50 border-t border-slate-100 px-8 py-4 text-center">
+            <p className="text-sm text-text-muted">
+              Don't have an account?{" "}
+              <Link to="/register" className="font-semibold text-primary hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </div>
+
+          <p className="px-8 pb-6 text-center text-xs text-text-muted mt-4">
             Access restricted to authorised personnel only.
           </p>
         </div>
