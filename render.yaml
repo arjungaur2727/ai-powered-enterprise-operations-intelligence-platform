@@ -15,7 +15,7 @@ services:
         value: HS256
       - key: ENVIRONMENT
         value: production
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
 
 databases:

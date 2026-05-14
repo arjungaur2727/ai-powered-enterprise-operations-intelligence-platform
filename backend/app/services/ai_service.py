@@ -1,7 +1,7 @@
 """
 app/services/ai_service.py
 
-Core AI service — GPT-4o prompt engineering, OpenAI API calls,
+Core AI service — Gemini prompt engineering, Gemini API calls,
 SQL extraction, confidence scoring, and session persistence.
 """
 
@@ -14,9 +14,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-import openai
+import google.generativeai as genai
 from fastapi import HTTPException, status
-from openai import OpenAI
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -35,7 +34,7 @@ from app.schemas.ai_query import (
 from app.services.schema_service import schema_service
 logger = get_logger(__name__)
 
-MODEL_NAME = "gpt-4o"
+MODEL_NAME = "gemini-2.5-flash"
 MAX_RETRIES = 2
 
 SYSTEM_PROMPT_TEMPLATE = """You are an expert PostgreSQL data analyst assistant for an enterprise operations platform.
@@ -71,10 +70,10 @@ Output: {{"sql": "SELECT du.target_table, du.file_name, du.row_count, du.status,
 
 
 class AIService:
-    """GPT-4o powered natural language to SQL generation service."""
+    """Gemini powered natural language to SQL generation service."""
 
     def __init__(self):
-        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        genai.configure(api_key=settings.GEMINI_API_KEY)
 
     # ------------------------------------------------------------------
     # 1. Build messages array
@@ -84,66 +83,81 @@ class AIService:
         natural_language: str,
         schema_text: str,
         conversation_history: list[dict],
-    ) -> list[dict]:
+    ) -> tuple[str, list[dict]]:
         system_content = SYSTEM_PROMPT_TEMPLATE.format(schema_text=schema_text)
-        messages: list[dict] = [{"role": "system", "content": system_content}]
         # Keep last 6 turns (3 pairs) for context efficiency
         trimmed_history = conversation_history[-6:] if conversation_history else []
-        messages.extend(trimmed_history)
-        messages.append({"role": "user", "content": natural_language})
-        return messages
+        
+        contents = []
+        for msg in trimmed_history:
+            role = "user" if msg["role"] == "user" else "model"
+            contents.append({"role": role, "parts": [msg["content"]]})
+            
+        contents.append({"role": "user", "parts": [natural_language]})
+        return system_content, contents
 
     # ------------------------------------------------------------------
-    # 2. Call OpenAI with retry
+    # 2. Call Gemini with retry
     # ------------------------------------------------------------------
-    def call_openai(
-        self, messages: list[dict]
+    def call_gemini(
+        self, system_instruction: str, contents: list[dict]
     ) -> tuple[str, int, int, int, int]:
         """Returns (raw_content, prompt_tokens, completion_tokens, total_tokens, ms)."""
         for attempt in range(MAX_RETRIES + 1):
             try:
                 start = time.perf_counter()
-                response = self.client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=messages,
-                    temperature=0,
-                    max_tokens=1500,
-                    response_format={"type": "json_object"},
+                model = genai.GenerativeModel(
+                    model_name=MODEL_NAME,
+                    system_instruction=system_instruction
+                )
+                response = model.generate_content(
+                    contents,
+                    generation_config=genai.GenerationConfig(
+                        temperature=0,
+                        max_output_tokens=1500,
+                        response_mime_type="application/json"
+                    )
                 )
                 elapsed_ms = int((time.perf_counter() - start) * 1000)
-                content = response.choices[0].message.content or ""
-                usage = response.usage
+                content = response.text
+                try:
+                    usage = response.usage_metadata
+                    p_tok = usage.prompt_token_count
+                    c_tok = usage.candidates_token_count
+                    total_tok = usage.total_token_count
+                except AttributeError:
+                    p_tok = 0
+                    c_tok = 0
+                    total_tok = 0
+
                 return (
                     content,
-                    usage.prompt_tokens,
-                    usage.completion_tokens,
-                    usage.total_tokens,
+                    p_tok,
+                    c_tok,
+                    total_tok,
                     elapsed_ms,
                 )
-            except openai.RateLimitError:
-                if attempt < MAX_RETRIES:
-                    time.sleep(2 ** attempt)
-                    continue
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="AI service rate limit reached. Please try again in a moment.",
-                )
-            except openai.APIConnectionError:
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail="Unable to connect to AI service. Check API key configuration.",
-                )
-            except openai.AuthenticationError:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid OpenAI API key. Contact your administrator.",
-                )
             except Exception as exc:
-                logger.error("OpenAI API error: %s", exc)
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="AI query generation failed. Please try again.",
-                )
+                import google.api_core.exceptions
+                if isinstance(exc, google.api_core.exceptions.ResourceExhausted):
+                    if attempt < MAX_RETRIES:
+                        time.sleep(2 ** attempt)
+                        continue
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail="AI service rate limit reached. Please try again in a moment.",
+                    )
+                elif isinstance(exc, google.api_core.exceptions.PermissionDenied):
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Invalid Gemini API key. Contact your administrator.",
+                    )
+                else:
+                    logger.error("Gemini API error: %s", exc)
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="AI query generation failed. Please try again.",
+                    )
         raise HTTPException(status_code=500, detail="AI generation failed after retries.")
 
     # ------------------------------------------------------------------
@@ -179,7 +193,7 @@ class AIService:
     # 4. Check daily token budget
     # ------------------------------------------------------------------
     def check_token_budget(self, db: Session) -> None:
-        max_tokens = getattr(settings, "OPENAI_MAX_TOKENS_PER_DAY", 100_000)
+        max_tokens = getattr(settings, "GEMINI_MAX_TOKENS_PER_DAY", 100_000)
         today_start = datetime.now(timezone.utc).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
@@ -207,10 +221,10 @@ class AIService:
         self.check_token_budget(db)
 
         schema_dict, schema_text = schema_service.get_schema_context(db)
-        messages = self.build_messages(
+        system_instruction, contents = self.build_messages(
             request.natural_language, schema_text, request.conversation_history
         )
-        raw, p_tok, c_tok, total_tok, gen_ms = self.call_openai(messages)
+        raw, p_tok, c_tok, total_tok, gen_ms = self.call_gemini(system_instruction, contents)
         parsed = self.parse_ai_response(raw)
 
         logger.info(

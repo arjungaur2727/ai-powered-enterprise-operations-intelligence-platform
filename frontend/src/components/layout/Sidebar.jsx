@@ -17,9 +17,28 @@ import {
   ScrollText,
   Users,
   LogOut,
-  Zap,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+
+function NexaLogo() {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+      <svg width={32} height={32} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="24,2 43,13 43,35 24,46 5,35 5,13" fill="url(#sbhg)" stroke="url(#sbsg)" strokeWidth="1.5"/>
+        <polyline points="14,34 14,14 30,34 30,14" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        <circle cx="34" cy="14" r="3" fill="#22D3EE"/>
+        <defs>
+          <linearGradient id="sbhg" x1="0" y1="0" x2="48" y2="48"><stop offset="0%" stopColor="#6366F1"/><stop offset="100%" stopColor="#4F46E5"/></linearGradient>
+          <linearGradient id="sbsg" x1="0" y1="0" x2="48" y2="48"><stop offset="0%" stopColor="#818CF8"/><stop offset="100%" stopColor="#6366F1"/></linearGradient>
+        </defs>
+      </svg>
+      <div>
+        <p style={{ fontSize:"13px", fontWeight:800, color:"white", lineHeight:1, margin:0, letterSpacing:"-0.3px" }}>NexaOps</p>
+        <p style={{ fontSize:"9px", color:"rgba(255,255,255,0.45)", lineHeight:1, marginTop:3, textTransform:"uppercase", letterSpacing:"0.07em" }}>Intelligence</p>
+      </div>
+    </div>
+  );
+}
 
 const ALL_NAV = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard, roles: ["admin", "manager", "analyst"] },
@@ -57,14 +76,8 @@ export default function Sidebar({ onClose }) {
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar-bg text-sidebar-text select-none">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <Zap className="h-4 w-4 text-white" />
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-white leading-tight">Enterprise Ops</p>
-          <p className="text-[10px] text-sidebar-text/60 leading-tight">Intelligence Platform</p>
-        </div>
+      <div className="flex items-center px-5 py-4 border-b border-white/10">
+        <NexaLogo />
       </div>
 
       {/* Navigation */}

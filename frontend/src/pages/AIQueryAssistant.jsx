@@ -93,13 +93,13 @@ export default function AIQueryAssistant() {
     setIsGenerating(true);
 
     // Build conversation history (last 6 turns)
-    const historyForGPT = conversationHistory.slice(-6);
+    const historyForGemini = conversationHistory.slice(-6);
 
     try {
       const response = await askAI({
         naturalLanguage: text,
         sessionGroupId,
-        conversationHistory: historyForGPT,
+        conversationHistory: historyForGemini,
         autoExecute: autoExecute && canExecute,
       });
 
@@ -261,7 +261,7 @@ export default function AIQueryAssistant() {
             </div>
             <div>
               <h2 className="font-bold text-sm text-gray-900">AI Query Assistant</h2>
-              <p className="text-[10px] text-gray-400">Powered by GPT-4o</p>
+              <p className="text-[10px] text-gray-400">Powered by Gemini 2.5 Flash</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

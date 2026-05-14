@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
 
-    # OpenAI
-    OPENAI_API_KEY: str
-    OPENAI_MAX_TOKENS_PER_DAY: int = 100_000
+    # Gemini
+    GEMINI_API_KEY: str
+    GEMINI_MAX_TOKENS_PER_DAY: int = 100_000
 
     # SMTP / Email
     SMTP_HOST: str = "smtp.gmail.com"
